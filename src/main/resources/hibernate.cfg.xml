@@ -1,0 +1,18 @@
+<!DOCTYPE hibernate-configuration SYSTEM
+        "classpath://org/hibernate/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+    <session-factory>
+        <property name="connection.driver_class">org.apache.derby.jdbc.EmbeddedDriver</property>
+        <property name="hibernate.connection.url">jdbc:derby:/tpudb;create=true</property>
+        <property name="hibernate.connection.username">tpu123</property>
+        <property name="hibernate.connection.password">tpu123</property>
+        <property name="connection.pool.size">2</property>
+        <property name="hibernate.dialect">org.hibernate.dialect.DerbyTenSevenDialect</property>
+        <property name="current_session_context_class">thread</property>
+        <property name="show_sql">true</property>
+        <property name="hbm2ddl.auto">update</property>
+
+        <mapping class="modelos.Persona" />
+    </session-factory>
+</hibernate-configuration>

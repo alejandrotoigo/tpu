@@ -83,7 +83,7 @@ fabric.properties
 # Reason: https://github.com/joeblau/gitignore.io/issues/186#issuecomment-249601023
 
 *.iml
-modules.xml
+.idea/modules.xml
 .idea/misc.xml
 *.ipr
 
@@ -104,3 +104,4 @@ buildNumber.properties
 .mvn/wrapper/maven-wrapper.jar
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij+all,maven
+/derby*
