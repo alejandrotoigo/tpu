@@ -1,6 +1,7 @@
 package util;
 
-import modelos.TSB_OAHashtable;
+import modelos.TSBHashtableDA;
+
 import negocio.Agrupacion;
 
 import java.io.File;
@@ -36,9 +37,9 @@ public class TextFile {
 
     }
 
-    public TSB_OAHashtable identificarAgrupacione() {
+    public TSBHashtableDA identificarAgrupacione() {
         String linea = "";
-        TSB_OAHashtable table = new TSB_OAHashtable(10);
+        TSBHashtableDA table = new TSBHashtableDA(10);
 
         try {
             Scanner scanner = new Scanner(archivo);
