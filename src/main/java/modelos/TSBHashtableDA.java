@@ -1,6 +1,8 @@
 package modelos;
 
+import javafx.scene.media.MediaException;
 import net.bytebuddy.asm.Advice;
+import net.bytebuddy.implementation.bytecode.Throw;
 import org.dom4j.util.AttributeHelper;
 
 import java.io.Serializable;
@@ -187,8 +189,9 @@ public class TSBHashtableDA<K,V> implements Map<K,V>, Cloneable, Serializable
     public V get(Object key) 
     {
         if(key == null ) throw new NullPointerException("get(): parámetro null");
-
         int ik = this.h((K) key);
+
+
 
         Map.Entry<K, V> x = this.search_for_entry((K)key, ik);
         if(x != null)
@@ -230,7 +233,7 @@ public class TSBHashtableDA<K,V> implements Map<K,V>, Cloneable, Serializable
        {
            if(this.load_level() >= this.load_factor) { this.rehash(); }
            int pos = search_for_OPEN(this.table, this.h(key));
-           Map.Entry<K, V> entry = new Entry<>(key, value, CLOSED);
+           Entry<K, V> entry = new Entry<>(key, value, CLOSED);
            table[pos] = entry;
 
            this.count++;
@@ -251,7 +254,6 @@ public class TSBHashtableDA<K,V> implements Map<K,V>, Cloneable, Serializable
     @Override
     public V remove(Object key) 
     {
-        // HACER...
         if(key == null) throw new NullPointerException("remove(): parámetro null");
         int ik = this.h((K)key);
 
@@ -260,7 +262,7 @@ public class TSBHashtableDA<K,V> implements Map<K,V>, Cloneable, Serializable
 
         if(x != null)
         {
-            int pos = this.search_for_index((K)key,ik);
+            int pos = this.search_for_index((K)x.getKey(),ik);
             value = x.getValue();
             table[pos] = new Entry<>(key, null, TOMBSTONE);
             this.count--;
@@ -407,9 +409,9 @@ public class TSBHashtableDA<K,V> implements Map<K,V>, Cloneable, Serializable
     @Override
     protected Object clone() throws CloneNotSupportedException 
     {
-
-        TSBHashtableDA<K, V> t = (TSBHashtableDA<K, V>)super.clone();
-
+        TSBHashtableDA<K, V> t = new TSBHashtableDA<>(this.table.length);
+        t.count = this.count;
+        System.arraycopy(this.table,0,t.table,0,this.table.length);
         return t;
     }
 
@@ -419,36 +421,45 @@ public class TSBHashtableDA<K,V> implements Map<K,V>, Cloneable, Serializable
      * @return true si los objetos son iguales.
      */
     @Override
-    public boolean equals(Object obj) 
-    {
-        if(!(obj instanceof Map)) { return false; }
-        
-        Map<K, V> t = (Map<K, V>) obj;
-        if(t.size() != this.size()) { return false; }
 
-        try 
+        public boolean equals(Object obj)
         {
-            Iterator<Map.Entry<K,V>> i = this.entrySet().iterator();
-            while(i.hasNext()) 
+            if(!(obj instanceof Map)) { return false; }
+
+            Map<K, V> t = (Map<K, V>) obj;
+            if(t.size() != this.size()) { return false; }
+
+            try
             {
-                Map.Entry<K, V> e = i.next();
-                K key = e.getKey();
-                V value = e.getValue();
-                if(t.get(key) == null) { return false; }
-                else 
+                Iterator<Map.Entry<K,V>> i = this.entrySet().iterator();
+                Map.Entry<K,V> b =
+                        i.next
+                                ();
+                while(b.getKey()!=null)
                 {
-                    if(!value.equals(t.get(key))) { return false; }
+                    K key = b.getKey();
+                    V value = b.getValue();
+                    if(t.get(key) == null  ) { return false; }
+
+                    else
+                    {
+                        V valor = t.get(key);
+                        if(!value.equals(valor)) { return false; }
+                    }
+                    b =
+                            i.next
+                                    ();
                 }
             }
-        } 
-        
-        catch (ClassCastException | NullPointerException e) 
-        {
-            return false;
+
+            catch (ClassCastException | NullPointerException e)
+            {
+                return false;
+            }
+
+            return true;
         }
 
-        return true;    
-    }
 
     /**
      * Retorna un hash code para la tabla completa.
@@ -875,9 +886,11 @@ public class TSBHashtableDA<K,V> implements Map<K,V>, Cloneable, Serializable
                         anteriorkey = actualkey;
                     indice++;
                     Entry<K,V> entry = (Entry<K, V>) t[indice];
-                    while (entry.getState() != CLOSED && hasNext()){
-                        indice++;
+                    while (entry==null || (entry.getState() != CLOSED && hasNext())){
+
                         entry = (Entry<K, V>) t[indice];
+
+                        indice++;
 
                     }
 
@@ -906,6 +919,7 @@ public class TSBHashtableDA<K,V> implements Map<K,V>, Cloneable, Serializable
                 { 
                     throw new IllegalStateException("remove(): debe invocar a next() antes de remove()..."); 
                 }
+                if(actualkey == null) throw new NoSuchElementException("El next no consiguio un elemento disponible");
                 V garbage= TSBHashtableDA.this.remove(actualkey);
                 actualkey = anteriorkey;
                 indice --;
@@ -1028,7 +1042,7 @@ public class TSBHashtableDA<K,V> implements Map<K,V>, Cloneable, Serializable
                 Object[] t = TSBHashtableDA.this.table;
 
 
-                return (indice<t.length);
+                return (indice+1<t.length);
             }
 
             /*
@@ -1055,9 +1069,11 @@ public class TSBHashtableDA<K,V> implements Map<K,V>, Cloneable, Serializable
                     entryanterior = entryactual;
                 indice++;
                 Entry<K,V> entry = (Entry<K, V>) t[indice];
-                while (entry.getState() != CLOSED && hasNext()){
+                while (entry==null || (entry.getState() != CLOSED && hasNext())){
                     indice++;
+
                     entry = (Entry<K, V>) t[indice];
+
 
                 }
 
@@ -1175,7 +1191,7 @@ public class TSBHashtableDA<K,V> implements Map<K,V>, Cloneable, Serializable
                 Object[] t = TSBHashtableDA.this.table;
 
 
-                return (indice<t.length);
+                return (indice+1<t.length);
             }
 
             /*
@@ -1200,12 +1216,11 @@ public class TSBHashtableDA<K,V> implements Map<K,V>, Cloneable, Serializable
                     valoranterior = valoractual;
                 indice++;
                 Entry<K,V> entry = (Entry<K, V>) t[indice];
-                while (entry.getState() != CLOSED && hasNext()){
+                while (entry==null || (entry.getState() != CLOSED && hasNext())){
                     indice++;
                     entry = (Entry<K, V>) t[indice];
 
                 }
-
                 valoractual = entry.getValue();
                 
 
@@ -1231,6 +1246,9 @@ public class TSBHashtableDA<K,V> implements Map<K,V>, Cloneable, Serializable
                 { 
                     throw new IllegalStateException("remove(): debe invocar a next() antes de remove()..."); 
                 }
+                if(valoractual == null && valoranterior != null) valoractual=valoranterior;
+                else
+                    throw new NullPointerException("El metodo Next no encontro un elemento disponible");
                 Object[] t = TSBHashtableDA.this.table;
                 Entry<K,V> entry = (Entry<K,V>) t[indice];
                 entry.setState(TOMBSTONE);
