@@ -1,6 +1,7 @@
 package modelos;
 
 import net.bytebuddy.asm.Advice;
+import org.dom4j.util.AttributeHelper;
 
 import java.io.Serializable;
 import java.util.*;
@@ -1173,6 +1174,7 @@ public class TSBHashtableDA<K,V> implements Map<K,V>, Cloneable, Serializable
             {
                 Object[] t = TSBHashtableDA.this.table;
 
+
                 return (indice<t.length);
             }
 
@@ -1229,7 +1231,9 @@ public class TSBHashtableDA<K,V> implements Map<K,V>, Cloneable, Serializable
                 { 
                     throw new IllegalStateException("remove(): debe invocar a next() antes de remove()..."); 
                 }
-
+                Object[] t = TSBHashtableDA.this.table;
+                Entry<K,V> entry = (Entry<K,V>) t[indice];
+                entry.setState(TOMBSTONE);
                 indice --;
 
                 // avisar que el remove() válido para next() ya se activó...
