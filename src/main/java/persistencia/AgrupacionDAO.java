@@ -1,9 +1,6 @@
 package persistencia;
 
-import modelos.Agrupacion;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import util.HibernateUtil;
+import negocio.Agrupacion;
 
 import java.util.List;
 

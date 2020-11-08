@@ -1,16 +1,9 @@
 package negocio;
 
 import excepciones.ServiceException;
-import modelos.Agrupacion;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 import persistencia.AgrupacionDAO;
-import util.HibernateUtil;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 public class FileServiceImpl implements FileService {
@@ -46,7 +39,7 @@ public class FileServiceImpl implements FileService {
                 linea = scanner.nextLine();
                 String[] campos = linea.split("\\|");
                 if (campos[0].compareTo(CODIGO_CATEGORIA_PRESIDENTE_VICEPRESIDENTE) == 0){
-                    Agrupacion agrupacion = new Agrupacion(Integer.parseInt(campos[2]),campos[3]);
+                    Agrupacion agrupacion = new Agrupacion((campos[2]),campos[3]);
                     // Persistimos en la bbdd
                     agrupacionDAO.persistSinTransaccion(agrupacion);
                 }
