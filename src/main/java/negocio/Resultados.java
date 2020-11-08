@@ -4,6 +4,7 @@ import util.TextFile;
 import modelos.TSBHashtableDA;
 
 import java.util.Collection;
+import java.util.Collections;
 
 public class Resultados {
     private TSBHashtableDA tabla;
@@ -28,6 +29,11 @@ public class Resultados {
     }
     public Collection getResultadosRegion(String codRegion){
         Agrupaciones a = (Agrupaciones) tabla.get(codRegion);
+        if (a == null) {
+            System.out.println("no hay votos contabilizados");
+            Collection col = Collections.EMPTY_LIST;
+            return col;
+        }
         return a.getResultados();
     }
 }
