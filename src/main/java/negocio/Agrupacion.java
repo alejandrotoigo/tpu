@@ -1,11 +1,7 @@
 package negocio;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
 
-@Entity
 public class Agrupacion {
-    @Id
     String codAgrupacion;
     String nombreAgrupacion;
     private int votos;
