@@ -1,5 +1,6 @@
 package negocio;
 
+import excepciones.ServiceException;
 import util.TextFile;
 import modelos.TSBHashtableDA;
 
@@ -18,8 +19,8 @@ public class Agrupaciones {
         }
     }
 
-    public static void leerAgrupaciones(String path){
-        TextFile fileAgrupaciones = new TextFile(path + "\\descripcion_postulaciones.dsv");
+    public static void leerAgrupaciones(String path) throws ServiceException {
+        TextFile fileAgrupaciones = new TextFile(path + "/descripcion_postulaciones.dsv");
         inicial = fileAgrupaciones.identificarAgrupaciones();
 
     }

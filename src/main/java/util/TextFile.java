@@ -1,5 +1,6 @@
 package util;
 
+import excepciones.ServiceException;
 import negocio.Agrupacion;
 import negocio.Region;
 import negocio.Resultados;
@@ -29,7 +30,7 @@ public class TextFile {
         return linea;
     }
 
-    public TSBHashtableDA identificarAgrupaciones() {
+    public TSBHashtableDA identificarAgrupaciones() throws ServiceException {
         String linea = "", campos[];
         TSBHashtableDA table = new TSBHashtableDA(10);
         Agrupacion agrupacion;
@@ -45,12 +46,12 @@ public class TextFile {
                 }
             }
         } catch (FileNotFoundException e) {
-            System.out.println("No se pudo leer el archivo");
+            throw new ServiceException("No se pudo leer el archivo descripcion_postulaciones.dsv en el directorio seleccionado");
         }
         return table;
     }
     // METODO DE ABAJO CONTROLADO
-    public void sumarVotosPorRegion(Resultados resultados) {
+    public void sumarVotosPorRegion(Resultados resultados) throws ServiceException {
         String linea = "", campos[], codAgrupacion;
 
         int votos;
@@ -74,7 +75,7 @@ public class TextFile {
                 }
             }
         } catch (FileNotFoundException e) {
-            System.out.println("No se pudo leer el archivo");
+            throw new ServiceException("No se pudo leer el archivo mesas_totales_agrp_politica.dsv");
         }
     }
 
@@ -99,7 +100,7 @@ public class TextFile {
         }
     }
     //METODO DE ABAJO CONTROLADO
-    public Region identificarRegiones() {
+    public Region identificarRegiones() throws ServiceException {
         String linea = "", campos[], codigo, nombre;
         Region pais = new Region("00", "Argentina");
         Region distrito, seccion;
@@ -136,7 +137,7 @@ public class TextFile {
                 }
             }
         } catch (FileNotFoundException e) {
-            System.out.println("No se pudo leer el archivo");
+            throw new ServiceException("No se pudo leer el archivo descripcion_regiones.dsv");
         }
         return pais;
     }

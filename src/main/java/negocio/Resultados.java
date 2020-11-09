@@ -1,5 +1,6 @@
 package negocio;
 
+import excepciones.ServiceException;
 import util.TextFile;
 import modelos.TSBHashtableDA;
 
@@ -9,9 +10,9 @@ import java.util.Collections;
 public class Resultados {
     private TSBHashtableDA tabla;
 
-    public Resultados(String path) {
+    public Resultados(String path) throws ServiceException {
         tabla = new TSBHashtableDA();
-        TextFile fileMesas = new TextFile(path + "\\mesas_totales_agrp_politica.dsv");
+        TextFile fileMesas = new TextFile(path + "/mesas_totales_agrp_politica.dsv");
         fileMesas.sumarVotosPorRegion(this);
     }
 

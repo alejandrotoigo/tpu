@@ -1,5 +1,6 @@
 package negocio;
 
+import excepciones.ServiceException;
 import util.TextFile;
 
 import java.util.Collection;
@@ -10,8 +11,8 @@ public class Regiones {
 
     private Region pais;
 
-    public Regiones(String path) {
-        fileRegiones = new TextFile(path + "\\descripcion_regiones.dsv");
+    public Regiones(String path) throws ServiceException {
+        fileRegiones = new TextFile(path + "/descripcion_regiones.dsv");
 
         //fileMesas = new TextFile(path + "\\mesas_totales_agrp_politica.dsv");
         pais = fileRegiones.identificarRegiones();
