@@ -30,6 +30,7 @@ public class Controller {
     public Resultados resultados;
     public Label lblCargaDatosInfo;
     public Button btnCambiar;
+    public ComboBox cboMesa;
 
     public void cambiarUbicacion(ActionEvent actionEvent) {
         DirectoryChooser dc = new DirectoryChooser();
@@ -56,6 +57,7 @@ public class Controller {
         cboCircuitos.setDisable(false);
         cboSecciones.setDisable(false);
         cboDistritos.setDisable(false);
+        cboMesa.setDisable(false);
         lvwResultados.setDisable(false);
         cboDistritos.setItems(ol);
         //Procesamos los totales por región
@@ -118,8 +120,29 @@ public class Controller {
         } else {
             cboCircuitos.setItems(null);
         }
+
+
+
+
     }
 
 
+    public void elegirMesa(ActionEvent actionEvent) {
+        ObservableList ol;
+        //Genera una lista de circuitos de la sección elegida
+        if (cboCircuitos.getValue() != null) {
+            Region mesa = (Region) cboCircuitos.getValue();
+            //Mostramos resultados de la mesa
+            ol = FXCollections.observableArrayList(resultados.getResultadosRegion(mesa.getCodigo()));
+            if (ol.size()==0)
+                lvwResultados.setVisible(false);
+            else
+                lvwResultados.setVisible(true);
+            lvwResultados.setItems(ol);
 
+        } else {
+            cboCircuitos.setItems(null);
+        }
+
+    }
 }

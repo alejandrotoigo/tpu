@@ -2,6 +2,7 @@ package util;
 
 import negocio.Agrupacion;
 import negocio.Region;
+import negocio.Regiones;
 import negocio.Resultados;
 import modelos.TSBHashtableDA;
 import java.io.File;
@@ -65,9 +66,8 @@ public class TextFile {
                     votos = Integer.parseInt(campos[6]);
                     //Acumulamos los votos del pais
                     resultados.sumarVotos("00",codAgrupacion,votos);
-                    //Acumulamos los votos del distrito, seccion y circuito de la mesa
-                    //resultados.sumarVotos(campos[0],campos[5],votos);
-                    for(int i = 0; i<3; i++){
+                    //Acumulamos los votos del distrito, seccion, circuito y de la mesa
+                        for(int i = 0; i<4; i++){
                         resultados.sumarVotos(campos[i],codAgrupacion,votos);
 
                     }
@@ -133,6 +133,8 @@ public class TextFile {
                         seccion.agregarSubregion(new Region(codigo,nombre));
 
                         break;
+
+
                 }
             }
         } catch (FileNotFoundException e) {
@@ -142,5 +144,8 @@ public class TextFile {
     }
 
 
-}
+
+    }
+
+
 

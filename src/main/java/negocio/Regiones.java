@@ -12,15 +12,14 @@ public class Regiones {
 
     public Regiones(String path) {
         fileRegiones = new TextFile(path + "\\descripcion_regiones.dsv");
-
-        //fileMesas = new TextFile(path + "\\mesas_totales_agrp_politica.dsv");
         pais = fileRegiones.identificarRegiones();
-        //fileMesas.sumarVotosPorAgrupacion(table);
     }
 
     public Collection getDistritos() {
         return pais.getSubregiones();
     }
+
+
 
 
 }

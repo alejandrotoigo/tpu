@@ -21,9 +21,6 @@ public class Resultados {
         if (tabla.get(codRegion) == null)
             tabla.put(codRegion, new Agrupaciones());
 
-        //actualizamos el total de votos
-        //actual = (int) tabla.get(codRegion);
-        //tabla.put(codRegion, actual + votos);
         Agrupaciones a = (Agrupaciones) tabla.get(codRegion);
         a.getAgrupacion(codAgrupacion).sumarVotos(votos);
     }
