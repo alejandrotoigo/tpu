@@ -1,24 +1,19 @@
 package interfaz;
 
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
+import excepciones.ServiceException;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.Cursor;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.control.*;
 import javafx.stage.DirectoryChooser;
 import negocio.Agrupaciones;
 import negocio.Region;
 import negocio.Regiones;
 import negocio.Resultados;
 
-import java.awt.event.MouseListener;
 import java.io.File;
 
 public class Controller {
@@ -30,7 +25,7 @@ public class Controller {
     public Resultados resultados;
     public Label lblCargaDatosInfo;
     public Button btnCambiar;
-    public ComboBox cboMesa;
+    public Button btnCargar;
 
     public void cambiarUbicacion(ActionEvent actionEvent) {
         DirectoryChooser dc = new DirectoryChooser();
@@ -45,28 +40,67 @@ public class Controller {
 // *********hasta acá controlado*********
 
     public void cargarDatos(ActionEvent actionEvent) {
-        ObservableList ol;
-        //Generamos lista de agrupaciones
-        
+        lblUbicacion.getScene().setCursor(Cursor.WAIT);
+        final ObservableList[] ol = new ObservableList[2];
+
+        btnCambiar.setDisable(true);
+        btnCargar.setDisable(true);
+
         lblCargaDatosInfo.setText("Cargando Datos al sistema. Por favor espere.");
-        Agrupaciones.leerAgrupaciones(lblUbicacion.getText());
-//HASTA ACA BIEN - PROBLEMAS EN LA CARGA DE DISTRITOS Y POR ENDE EN LA CARGA DE REGIONES, PERO NO DE CIRCUITOS
-        //Generamos lista de distritos del país
-        Regiones regiones = new Regiones(lblUbicacion.getText());
-        ol = FXCollections.observableArrayList(regiones.getDistritos());
-        cboCircuitos.setDisable(false);
-        cboSecciones.setDisable(false);
-        cboDistritos.setDisable(false);
-        cboMesa.setDisable(false);
-        lvwResultados.setDisable(false);
-        cboDistritos.setItems(ol);
-        //Procesamos los totales por región
-        resultados = new Resultados(lblUbicacion.getText());
-        //System.out.println(resultados);
-        ol = FXCollections.observableArrayList(resultados.getResultadosRegion("00"));
-        lvwResultados.setItems(ol);
-        lblCargaDatosInfo.setText("Datos Cargados en el sistema.");
-        btnCambiar.setVisible(false);
+        Task<Void> task = new Task<Void>() {
+            @Override
+            public Void call() {
+                File directorio = new File(lblUbicacion.getText());
+
+                try {
+                    // Validamos que se haya seleccionada
+                    // un directorio y no un archivo
+                    if (!directorio.isDirectory()) {
+                        throw new ServiceException("El directorio seleccionado no es válido");
+                    }
+
+
+                    //Generamos lista de agrupaciones
+                    Agrupaciones.leerAgrupaciones(lblUbicacion.getText());
+
+                    //Generamos lista de distritos del país
+                    Regiones regiones = new Regiones(lblUbicacion.getText());
+                    ol[0] = FXCollections.observableArrayList(regiones.getDistritos());
+
+                    //Procesamos los totales por región
+                    resultados = new Resultados(lblUbicacion.getText());
+
+                    ol[1] = FXCollections.observableArrayList(resultados.getResultadosRegion("00"));
+
+                } catch (ServiceException se) {
+                    Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setContentText(se.getMessage());
+                        alert.showAndWait();
+                    });
+                    this.cancel(true);
+                }
+
+                return null;
+            }
+        };
+        task.setOnSucceeded(e -> {
+            cboCircuitos.setDisable(false);
+            cboSecciones.setDisable(false);
+            cboDistritos.setDisable(false);
+            lvwResultados.setDisable(false);
+            cboDistritos.setItems(ol[0]);
+            lvwResultados.setItems(ol[1]);
+            lblCargaDatosInfo.setText("Datos Cargados en el sistema.");
+            lblUbicacion.getScene().setCursor(Cursor.DEFAULT);
+        });
+        task.setOnCancelled(e -> {
+            lblCargaDatosInfo.setText("");
+            btnCambiar.setDisable(false);
+            btnCargar.setDisable(false);
+            lblUbicacion.getScene().setCursor(Cursor.DEFAULT);
+        });
+        new Thread(task).start();
 
 
     }
@@ -84,7 +118,6 @@ public class Controller {
 
     }
 
-    // ***********controlado desde acá hasta el final***********
     public void elegirSeccion(ActionEvent actionEvent) {
         ObservableList ol;
         //Genera una lista de circuitos de la sección elegida
@@ -111,7 +144,7 @@ public class Controller {
             Region circuito = (Region) cboCircuitos.getValue();
             //Mostramos resultados del circuito
             ol = FXCollections.observableArrayList(resultados.getResultadosRegion(circuito.getCodigo()));
-            if (ol.size()==0)
+            if (ol.size() == 0)
                 lvwResultados.setVisible(false);
             else
                 lvwResultados.setVisible(true);
@@ -120,29 +153,7 @@ public class Controller {
         } else {
             cboCircuitos.setItems(null);
         }
-
-
-
-
     }
 
 
-    public void elegirMesa(ActionEvent actionEvent) {
-        ObservableList ol;
-        //Genera una lista de circuitos de la sección elegida
-        if (cboCircuitos.getValue() != null) {
-            Region mesa = (Region) cboCircuitos.getValue();
-            //Mostramos resultados de la mesa
-            ol = FXCollections.observableArrayList(resultados.getResultadosRegion(mesa.getCodigo()));
-            if (ol.size()==0)
-                lvwResultados.setVisible(false);
-            else
-                lvwResultados.setVisible(true);
-            lvwResultados.setItems(ol);
-
-        } else {
-            cboCircuitos.setItems(null);
-        }
-
-    }
 }
