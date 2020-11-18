@@ -1,6 +1,8 @@
 package negocio;
 
 import java.util.Collection;
+import java.util.Map;
+
 import modelos.TSBHashtableDA;
 
 public class Region {
@@ -19,6 +21,7 @@ public class Region {
         this.nombre = nombre;
         this.subregiones = new TSBHashtableDA();
     }
+
 
     public void agregarSubregion(Region region){
         subregiones.put(region.codigo, region);
@@ -49,7 +52,12 @@ public class Region {
         return codigo;
     }
 
+
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
+
+
 }
+
+

@@ -1,6 +1,7 @@
 package util;
 
 import excepciones.ServiceException;
+import modelos.TSBArrayList;
 import negocio.Agrupacion;
 import negocio.Region;
 import negocio.Regiones;
@@ -8,10 +9,12 @@ import negocio.Resultados;
 import modelos.TSBHashtableDA;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class TextFile {
     private File file;
+
 
     public TextFile(String path) {
         file = new File(path);
@@ -45,16 +48,17 @@ public class TextFile {
                     agrupacion = new Agrupacion((campos[2]), campos[3]);
                     table.put(agrupacion.getCodigo(), agrupacion);
                 }
+
             }
         } catch (FileNotFoundException e) {
             throw new ServiceException("No se pudo leer el archivo descripcion_postulaciones.dsv en el directorio seleccionado");
         }
         return table;
     }
-    // METODO DE ABAJO CONTROLADO
-    public void sumarVotosPorRegion(Resultados resultados) throws ServiceException {
-        String linea = "", campos[], codAgrupacion;
 
+    // METODO DE ABAJO CONTROLADO
+    public void sumarVotosPorRegion(Resultados resultados,Regiones regiones) throws ServiceException {
+        String linea = "", campos[], codAgrupacion;
         int votos;
         try {
             Scanner scanner = new Scanner(file);
@@ -63,15 +67,21 @@ public class TextFile {
                 campos = linea.split("\\|");
                 codAgrupacion = campos[5];
                 //Filtramos votación para Presidente
-                    if (campos[4].compareTo("000100000000000") == 0) {
+                if (campos[4].compareTo("000100000000000") == 0) {
                     votos = Integer.parseInt(campos[6]);
                     //Acumulamos los votos del pais
-                    resultados.sumarVotos("00",codAgrupacion,votos);
+                    resultados.sumarVotos("00", codAgrupacion, votos);
                     //Acumulamos los votos del distrito, seccion, circuito y de la mesa
-                        for(int i = 0; i<4; i++){
-                        resultados.sumarVotos(campos[i],codAgrupacion,votos);
+                    for (int i = 0; i < 4; i++) {
+                        resultados.sumarVotos(campos[i], codAgrupacion, votos);
 
                     }
+                    Region Pais = regiones.getPais();
+                    Region distrito = Pais.getSubregion(campos[0]);
+                    Region seccion = distrito.getSubregion(campos[1]);
+                    Region circuito = seccion.getSubregion(campos[2]);
+                    circuito.getOrPutSubregion(campos[3]);
+
                 }
             }
         } catch (FileNotFoundException e) {
@@ -99,6 +109,7 @@ public class TextFile {
             System.out.println("No se pudo leer el archivo");
         }
     }
+
     //METODO DE ABAJO CONTROLADO
     public Region identificarRegiones() throws ServiceException {
         String linea = "", campos[], codigo, nombre;
@@ -112,26 +123,27 @@ public class TextFile {
                 campos = linea.split("\\|");
 
                 codigo = campos[0];
-    //CONTROLADO HASTA ACA
+                //CONTROLADO HASTA ACA
 
                 nombre = campos[1];
-                switch(codigo.length()){
+                switch (codigo.length()) {
                     case 2:
                         //Distrito
-                            distrito = pais.getOrPutSubregion(codigo);
-                            distrito.setNombre(nombre);
-                            break;
+                        distrito = pais.getOrPutSubregion(codigo);
+                        distrito.setNombre(nombre);
+                        break;
                     case 5:
                         //Seccion
-                            distrito = pais.getOrPutSubregion(codigo.substring(0,2));
-                            seccion = distrito.getOrPutSubregion(codigo);
-                            seccion.setNombre(nombre);
-                            break;
+                        distrito = pais.getOrPutSubregion(codigo.substring(0, 2));
+                        seccion = distrito.getOrPutSubregion(codigo);
+                        seccion.setNombre(nombre);
+                        break;
                     case 11:
                         //Circuito
-                        distrito = pais.getOrPutSubregion(codigo.substring(0,2));
-                        seccion = distrito.getOrPutSubregion(codigo.substring(0,5));
-                        seccion.agregarSubregion(new Region(codigo,nombre));
+                        distrito = pais.getOrPutSubregion(codigo.substring(0, 2));
+                        seccion = distrito.getOrPutSubregion(codigo.substring(0, 5));
+                        Region circuito = new Region(codigo,nombre);
+                        seccion.agregarSubregion(circuito);
 
                         break;
 
@@ -141,12 +153,12 @@ public class TextFile {
         } catch (FileNotFoundException e) {
             throw new ServiceException("No se pudo leer el archivo descripcion_regiones.dsv");
         }
+
         return pais;
-    }
-
-
 
     }
+
+}
 
 
 

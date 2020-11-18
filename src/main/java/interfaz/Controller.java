@@ -26,6 +26,7 @@ public class Controller {
     public Label lblCargaDatosInfo;
     public Button btnCambiar;
     public Button btnCargar;
+    public ComboBox cboMesa;
 
     public void cambiarUbicacion(ActionEvent actionEvent) {
         DirectoryChooser dc = new DirectoryChooser();
@@ -68,7 +69,7 @@ public class Controller {
                     ol[0] = FXCollections.observableArrayList(regiones.getDistritos());
 
                     //Procesamos los totales por región
-                    resultados = new Resultados(lblUbicacion.getText());
+                    resultados = new Resultados(lblUbicacion.getText(), regiones);
 
                     ol[1] = FXCollections.observableArrayList(resultados.getResultadosRegion("00"));
 
@@ -85,8 +86,6 @@ public class Controller {
             }
         };
         task.setOnSucceeded(e -> {
-            cboCircuitos.setDisable(false);
-            cboSecciones.setDisable(false);
             cboDistritos.setDisable(false);
             lvwResultados.setDisable(false);
             cboDistritos.setItems(ol[0]);
@@ -115,6 +114,7 @@ public class Controller {
         //Mostramos resultados del Distrito
         ol = FXCollections.observableArrayList(resultados.getResultadosRegion(distrito.getCodigo()));
         lvwResultados.setItems(ol);
+        cboSecciones.setDisable(false);
 
     }
 
@@ -130,10 +130,25 @@ public class Controller {
                 cboCircuitos.setItems(ol);
             //Mostramos resultados de la sección
             ol = FXCollections.observableArrayList(resultados.getResultadosRegion(seccion.getCodigo()));
-            lvwResultados.setVisible(true);
-            lvwResultados.setItems(ol);
+            if (ol.size() == 0) {
+                cboCircuitos.setDisable(true);
+                cboMesa.setDisable(true);
+                lvwResultados.setItems(null);
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setContentText("No hay votos contabilizados para esta sección");
+                alert.showAndWait();
+            } else {
+                cboCircuitos.setDisable(false);
+                lvwResultados.setVisible(true);
+                lvwResultados.setItems(ol);
+            }
+
         } else {
             cboCircuitos.setItems(null);
+            cboMesa.setItems(null);
+            cboCircuitos.setDisable(true);
+            cboMesa.setDisable(true);
+
         }
     }
 
@@ -141,19 +156,54 @@ public class Controller {
         ObservableList ol;
         //Genera una lista de circuitos de la sección elegida
         if (cboCircuitos.getValue() != null) {
+
             Region circuito = (Region) cboCircuitos.getValue();
+            ol = FXCollections.observableArrayList(circuito.getSubregiones());
+            cboMesa.setItems(ol);
+            if (cboMesa.getItems() == null)
+                cboMesa.setItems(ol);
             //Mostramos resultados del circuito
             ol = FXCollections.observableArrayList(resultados.getResultadosRegion(circuito.getCodigo()));
-            if (ol.size() == 0)
-                lvwResultados.setVisible(false);
-            else
+            if (ol.size() == 0) {
+                cboMesa.setDisable(true);
+                lvwResultados.setItems(null);
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setContentText("No hay votos contabilizados para este circuito");
+                alert.showAndWait();
+            } else {
+                cboMesa.setDisable(false);
                 lvwResultados.setVisible(true);
-            lvwResultados.setItems(ol);
+                lvwResultados.setItems(ol);
+            }
 
         } else {
             cboCircuitos.setItems(null);
+            cboMesa.setItems(null);
+            cboMesa.setDisable(true);
         }
     }
 
 
+    public void elegirMesa(ActionEvent actionEvent) {
+        ObservableList ol;
+        //Genera una lista de circuitos de la sección elegida
+        if (cboMesa.getValue() != null) {
+            Region mesa = (Region) cboMesa.getValue();
+            //Mostramos resultados del circuito
+            ol = FXCollections.observableArrayList(resultados.getResultadosRegion(mesa.getCodigo()));
+            if (ol.size() == 0) {
+                lvwResultados.setItems(null);
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setContentText("No hay votos contabilizados para esta mesa");
+                alert.showAndWait();
+            } else {
+                lvwResultados.setVisible(true);
+                lvwResultados.setItems(ol);
+            }
+
+        } else {
+            cboMesa.setItems(null);
+        }
+
+    }
 }

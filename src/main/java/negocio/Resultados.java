@@ -6,14 +6,18 @@ import modelos.TSBHashtableDA;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
 
 public class Resultados {
     private TSBHashtableDA tabla;
 
-    public Resultados(String path) throws ServiceException {
+
+    public Resultados(String path, Regiones regiones) throws ServiceException {
         tabla = new TSBHashtableDA();
         TextFile fileMesas = new TextFile(path + "/mesas_totales_agrp_politica.dsv");
-        fileMesas.sumarVotosPorRegion(this);
+        fileMesas.sumarVotosPorRegion(this,regiones);
+
     }
 
     public void sumarVotos(String codRegion, String codAgrupacion, int votos) {
@@ -28,11 +32,13 @@ public class Resultados {
     public Collection getResultadosRegion(String codRegion){
         Agrupaciones a = (Agrupaciones) tabla.get(codRegion);
         if (a == null) {
-            System.out.println("no hay votos contabilizados");
             Collection col = Collections.EMPTY_LIST;
             return col;
         }
         return a.getResultados();
     }
+
+
+ 
 }
 
